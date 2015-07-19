@@ -1,23 +1,19 @@
 package com.demo.web.rest.resources;
 
-import com.demo.web.security.AuthenticationUserDetailsService;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-
-import com.demo.web.transfer.UserTransfer;
-import javax.ws.rs.GET;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,15 +23,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.demo.web.security.AuthenticationUserDetailsService;
+import com.demo.web.transfer.UserTransfer;
+
 @Service
 @Path("/user")
 public class UserResource {
-
-    @Value("${facebook.apiKey}")
-    private String apiKey;
-
-    @Value("${facebook.apiSecret}")
-    private String apiSecret;
 
     @Autowired(required = true)
     private AuthenticationUserDetailsService userDetailsService;

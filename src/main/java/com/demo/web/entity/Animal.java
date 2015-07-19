@@ -1,13 +1,10 @@
 package com.demo.web.entity;
 
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.DiscriminatorOptions;
 
 @Entity
 @Table(name = "animal")
