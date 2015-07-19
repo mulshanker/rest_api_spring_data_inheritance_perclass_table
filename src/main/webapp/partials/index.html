@@ -1,0 +1,31 @@
+<div class="pull-right">
+    <a href="#!/create" class="btn btn-default" ng-show="hasRole('admin')" title="Create"><span class="glyphicon glyphicon-plus"></span></a>
+</div>
+<div class="page-header">
+    <h3>Animals</h3>
+</div>
+
+
+<table class="table table-hover table-striped">
+	<thead>
+	 <tr>
+	   	<td width="25%">Name</td>
+	   	<td width="25%">Age</td>
+	   	<td width="25%">Type</td>
+	   	<td width="25%">
+	   		Action
+	   	</td>
+ 	  </tr>
+	</thead>
+	
+   <tr ng-repeat="animalEntry in animalEntries">
+   	<td width="25%">{{animalEntry.name}}</td>
+   	<td width="25%">{{animalEntry.age}}</td>
+   	<td width="25%">{{animalEntry.type}}</td>
+   	<td width="25%">
+   		<a href="" ng-click="deleteEntry(animalEntry)" class="btn btn-xs btn-default" ng-show="hasRole('admin')" title="delete"><span class="glyphicon glyphicon-trash"></span></a>
+        <a href="#!/edit/{{animalEntry.id}}" class="btn btn-xs btn-default" ng-show="hasRole('admin')" title="edit"><span class="glyphicon glyphicon-pencil"></span></a>
+   	</td>
+   	
+   </tr>
+</table>
