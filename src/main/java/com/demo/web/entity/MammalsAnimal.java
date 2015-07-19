@@ -6,9 +6,12 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 @Entity
 @Table(name = "mammals_animal")
 @PrimaryKeyJoinColumn(name = "animal_id", referencedColumnName = "id")
+@JsonIgnoreProperties
 public class MammalsAnimal extends Animal{
 
 
