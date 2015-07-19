@@ -1,6 +1,10 @@
 package com.demo.web.rest.resources;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -36,144 +40,203 @@ import com.demo.web.entity.MammalsAnimal;
 import com.demo.web.repository.AnimalRepository;
 import com.demo.web.repository.BirdsAnimalRepository;
 import com.demo.web.repository.MammalsAnimalRepository;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataParam;
 
 @Service
 @Path("/animals")
 public class AnimalResource {
 
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Autowired(required = true)
-    private MammalsAnimalRepository mammalsAnimalRepository;
-    
-    @Autowired(required = true)
-    private BirdsAnimalRepository birdsAnimalRepository;
-    
-    @Autowired(required = true)
-    private AnimalRepository animalRepository;
+	@Autowired(required = true)
+	private MammalsAnimalRepository mammalsAnimalRepository;
 
-    @Autowired(required = true)
-    private ObjectMapper mapper;
+	@Autowired(required = true)
+	private BirdsAnimalRepository birdsAnimalRepository;
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response list() throws JsonGenerationException, JsonMappingException, IOException {
+	@Autowired(required = true)
+	private AnimalRepository animalRepository;
 
-        logger.info("list()");
+	@Autowired(required = true)
+	private ObjectMapper mapper;
 
-        ObjectWriter viewWriter;
-        if (this.isAdmin()) {
-            viewWriter = mapper.writerWithView(JsonViews.Admin.class);
-        } else {
-            viewWriter = mapper.writerWithView(JsonViews.User.class);
-        }
-        List<Animal> allEntries = animalRepository.findAll();
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response list() throws JsonGenerationException, JsonMappingException, IOException {
 
-        String valueAsString = viewWriter.writeValueAsString(allEntries);
-        Response response = Response.status(Response.Status.OK).entity(valueAsString).build();
+		logger.info("list()");
 
-        return response;
-    }
+		ObjectWriter viewWriter;
+		if (this.isAdmin()) {
+			viewWriter = mapper.writerWithView(JsonViews.Admin.class);
+		} else {
+			viewWriter = mapper.writerWithView(JsonViews.User.class);
+		}
+		List<Animal> allEntries = animalRepository.findAll();
 
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id}")
-    public Response read(@PathParam("id") Long id) {
+		String valueAsString = viewWriter.writeValueAsString(allEntries);
+		Response response = Response.status(Response.Status.OK).entity(valueAsString).build();
 
-        logger.info("read(id)");
+		return response;
+	}
 
-        Animal animal = animalRepository.findOne(id);
-        if (animal == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
-        }
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("{id}")
+	public Response read(@PathParam("id") Long id) {
 
-        Response response = Response.status(Response.Status.OK).entity(animal).build();
+		logger.info("read(id)");
 
-        return response;
-    }
+		Animal animal = animalRepository.findOne(id);
+		if (animal == null) {
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		}
 
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response create(JsonNode newEntry) throws JsonParseException, JsonMappingException, IOException {
+		Response response = Response.status(Response.Status.OK).entity(animal).build();
 
-        ObjectMapper mapper = new ObjectMapper();
-        Response response = null;
-        
-        if(newEntry.get("type").getTextValue().equalsIgnoreCase(BirdsAnimal.class.getSimpleName())){
-        	//Create BirdsAnimal
-        	BirdsAnimal birdsAnimal = mapper.readValue(newEntry, BirdsAnimal.class);
-        	birdsAnimalRepository.save(mapper.readValue(newEntry, BirdsAnimal.class));
-            response = Response.status(Response.Status.OK).entity(birdsAnimal).build();
-        }else if(newEntry.get("type").getTextValue().equalsIgnoreCase(MammalsAnimal.class.getSimpleName())){
-        	//Create mammalsAnimal
-        	MammalsAnimal mammalsAnimal = mapper.readValue(newEntry, MammalsAnimal.class);
-        	mammalsAnimalRepository.save(mammalsAnimal);
-        	response = Response.status(Response.Status.OK).entity(mammalsAnimal).build();
-        }
-        return response;
-    }
+		return response;
+	}
 
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Path("{id}")
-    public Response update(@PathParam("id") Long id, JsonNode newEntry) throws JsonParseException, JsonMappingException, IOException {
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response create(JsonNode newEntry) throws JsonParseException, JsonMappingException, IOException {
 
-        logger.info("update(): " + newEntry);
-        
+		ObjectMapper mapper = new ObjectMapper();
+		Response response = null;
 
-        Animal animal = animalRepository.findOne(id);
-        if (animal == null) {
-            throw new WebApplicationException(Response.Status.NOT_FOUND);
-        }
-        
-        ObjectMapper mapper = new ObjectMapper();
-        Response response = null;
-        
-        if(newEntry.get("type").getTextValue().equalsIgnoreCase(BirdsAnimal.class.getSimpleName())){
-        	//Create BirdsAnimal
-        	BirdsAnimal birdsAnimal = mapper.readValue(newEntry, BirdsAnimal.class);
-        	birdsAnimalRepository.save(mapper.readValue(newEntry, BirdsAnimal.class));
-            response = Response.status(Response.Status.OK).entity(birdsAnimal).build();
-        }else if(newEntry.get("type").getTextValue().equalsIgnoreCase(MammalsAnimal.class.getSimpleName())){
-        	//Create mammalsAnimal
-        	MammalsAnimal mammalsAnimal = mapper.readValue(newEntry, MammalsAnimal.class);
-        	mammalsAnimalRepository.save(mammalsAnimal);
-        	response = Response.status(Response.Status.OK).entity(mammalsAnimal).build();
-        }
+		if(newEntry.get("type").getTextValue().equalsIgnoreCase(BirdsAnimal.class.getSimpleName())){
+			//Create BirdsAnimal
+			BirdsAnimal birdsAnimal = mapper.readValue(newEntry, BirdsAnimal.class);
+			birdsAnimalRepository.save(mapper.readValue(newEntry, BirdsAnimal.class));
+			response = Response.status(Response.Status.OK).entity(birdsAnimal).build();
+		}else if(newEntry.get("type").getTextValue().equalsIgnoreCase(MammalsAnimal.class.getSimpleName())){
+			//Create mammalsAnimal
+			MammalsAnimal mammalsAnimal = mapper.readValue(newEntry, MammalsAnimal.class);
+			mammalsAnimalRepository.save(mammalsAnimal);
+			response = Response.status(Response.Status.OK).entity(mammalsAnimal).build();
+		}
+		return response;
+	}
 
-        return response;
-    }
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Path("{id}")
+	public Response update(@PathParam("id") Long id, JsonNode newEntry) throws JsonParseException, JsonMappingException, IOException {
 
-    @DELETE
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("{id}")
-    public Response delete(@PathParam("id") Long id) {
+		logger.info("update(): " + newEntry);
 
-        logger.info("delete(id)");
 
-        animalRepository.delete(id);
-        Response response = Response.status(Response.Status.OK).build();
+		Animal animal = animalRepository.findOne(id);
+		if (animal == null) {
+			throw new WebApplicationException(Response.Status.NOT_FOUND);
+		}
 
-        return response;
-    }
+		ObjectMapper mapper = new ObjectMapper();
+		Response response = null;
 
-    private boolean isAdmin() {
+		if(newEntry.get("type").getTextValue().equalsIgnoreCase(BirdsAnimal.class.getSimpleName())){
+			//Create BirdsAnimal
+			BirdsAnimal birdsAnimal = mapper.readValue(newEntry, BirdsAnimal.class);
+			birdsAnimalRepository.save(mapper.readValue(newEntry, BirdsAnimal.class));
+			response = Response.status(Response.Status.OK).entity(birdsAnimal).build();
+		}else if(newEntry.get("type").getTextValue().equalsIgnoreCase(MammalsAnimal.class.getSimpleName())){
+			//Create mammalsAnimal
+			MammalsAnimal mammalsAnimal = mapper.readValue(newEntry, MammalsAnimal.class);
+			mammalsAnimalRepository.save(mammalsAnimal);
+			response = Response.status(Response.Status.OK).entity(mammalsAnimal).build();
+		}
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof String && ((String) principal).equalsIgnoreCase("anonymousUser")) {
-            return false;
-        }
-        UserDetails userDetails = (UserDetails) principal;
+		return response;
+	}
 
-        for (GrantedAuthority authority : userDetails.getAuthorities()) {
-            if (authority.toString().equals("admin")) {
-                return true;
-            }
-        }
+	@DELETE
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("{id}")
+	public Response delete(@PathParam("id") Long id) {
 
-        return false;
-    }
+		logger.info("delete(id)");
+
+		animalRepository.delete(id);
+		Response response = Response.status(Response.Status.OK).build();
+
+		return response;
+	}
+
+
+/*
+	@POST
+	@Path("/upload")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response uploadFile(
+			@FormDataParam("file") InputStream uploadedInputStream,
+			@FormDataParam("file") FormDataContentDisposition fileDetail) {
+		
+		BufferedReader br = null;
+		String line = "";
+		String cvsSplitBy = ",";
+	 
+		try {
+			boolean header = true;
+			String[] headers = null;
+			
+			br = new BufferedReader(new InputStreamReader(uploadedInputStream));
+			while ((line = br.readLine()) != null) {
+	 
+				if(header){
+					headers = line.split(cvsSplitBy);
+				}else{
+					String[] data = line.split(cvsSplitBy);
+					
+					for (int i = 0; i < headers.length; i++) {
+					
+					}
+				
+				}
+				
+	 
+			}
+	 
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	 
+		System.out.println("Done");
+	  
+	
+		Response response = Response.status(Response.Status.OK).build();
+		return response;
+
+	}
+
+*/
+	private boolean isAdmin() {
+
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Object principal = authentication.getPrincipal();
+		if (principal instanceof String && ((String) principal).equalsIgnoreCase("anonymousUser")) {
+			return false;
+		}
+		UserDetails userDetails = (UserDetails) principal;
+
+		for (GrantedAuthority authority : userDetails.getAuthorities()) {
+			if (authority.toString().equals("admin")) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

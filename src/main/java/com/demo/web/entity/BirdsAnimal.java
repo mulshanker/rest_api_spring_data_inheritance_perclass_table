@@ -20,7 +20,7 @@ public class BirdsAnimal extends Animal{
 
 
     @Column
-    private String wingsColor;
+    private String numberOfWings;
     
 
     public BirdsAnimal() {
@@ -42,17 +42,16 @@ public class BirdsAnimal extends Animal{
 	}
 
 
-	public String getWingsColor() {
-		return wingsColor;
+	public String getNumberOfWings() {
+		return numberOfWings;
 	}
 
 
-	public void setWingsColor(String wingsColor) {
-		this.wingsColor = wingsColor;
+	public void setNumberOfWings(String numberOfWings) {
+		this.numberOfWings = numberOfWings;
 	}
 
 
 
-   
 
 }
